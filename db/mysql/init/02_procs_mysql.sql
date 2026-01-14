@@ -1,7 +1,11 @@
 USE credit_card_app;
 DELIMITER //
 
-DROP PROCEDURE IF EXISTS sp_create_user;//
+-- ----------------------------------------------------
+-- USERS
+-- ----------------------------------------------------
+
+DROP PROCEDURE IF EXISTS sp_create_user//
 CREATE PROCEDURE sp_create_user(
     IN p_Username VARCHAR(100),
     IN p_Email VARCHAR(256),
@@ -12,24 +16,43 @@ BEGIN
     INSERT INTO users (Username, Email, PasswordHash, PasswordSalt)
     VALUES (p_Username, p_Email, p_PasswordHash, p_PasswordSalt);
 
-    SELECT UserId, Username, Email, CreatedAtUtc
+    SELECT
+        CAST(UserId AS CHAR(36)) AS UserId,
+        Username,
+        Email,
+        IsActive,
+        CreatedAtUtc,
+        UpdatedAtUtc
     FROM users
-    WHERE Username = p_Username;
-END;//
+    WHERE Username = p_Username
+    LIMIT 1;
+END//
 
-DROP PROCEDURE IF EXISTS sp_authenticate_user;//
+DROP PROCEDURE IF EXISTS sp_authenticate_user//
 CREATE PROCEDURE sp_authenticate_user(
     IN p_Username VARCHAR(100),
-    IN p_PasswordHash VARCHAR(512)
+    IN p_PasswordHash VARCHAR(512) -- se mantiene por compatibilidad (aunque no lo usas)
 )
 BEGIN
-    SELECT UserId, Username, Email, PasswordHash, PasswordSalt, IsActive
+    SELECT
+        CAST(UserId AS CHAR(36)) AS UserId,
+        Username,
+        Email,
+        PasswordHash,
+        PasswordSalt,
+        IsActive,
+        CreatedAtUtc,
+        UpdatedAtUtc
     FROM users
     WHERE Username = p_Username AND IsActive = 1
     LIMIT 1;
-END;//
+END//
 
-DROP PROCEDURE IF EXISTS sp_add_card;//
+-- ----------------------------------------------------
+-- CARDS
+-- ----------------------------------------------------
+
+DROP PROCEDURE IF EXISTS sp_add_card//
 CREATE PROCEDURE sp_add_card(
     IN p_UserId CHAR(36),
     IN p_Brand VARCHAR(50),
@@ -42,13 +65,34 @@ CREATE PROCEDURE sp_add_card(
 BEGIN
     DECLARE v_CardId CHAR(36) DEFAULT (UUID());
 
-    INSERT INTO cards (CardId, UserId, Brand, Last4, ExpMonth, ExpYear, CreditLimit, AvailableCredit, Status, Nickname)
-    VALUES (v_CardId, p_UserId, p_Brand, p_Last4, p_ExpMonth, p_ExpYear, p_CreditLimit, p_CreditLimit, 'ACTIVE', p_Nickname);
+    INSERT INTO cards (
+        CardId, UserId, Brand, Last4, ExpMonth, ExpYear,
+        CreditLimit, AvailableCredit, Status, Nickname
+    )
+    VALUES (
+        v_CardId, p_UserId, p_Brand, p_Last4, p_ExpMonth, p_ExpYear,
+        p_CreditLimit, p_CreditLimit, 'ACTIVE', p_Nickname
+    );
 
-    SELECT * FROM cards WHERE CardId = v_CardId;
-END;//
+    SELECT
+        CAST(CardId AS CHAR(36)) AS CardId,
+        CAST(UserId AS CHAR(36)) AS UserId,
+        Brand,
+        Last4,
+        ExpMonth,
+        ExpYear,
+        CreditLimit,
+        AvailableCredit,
+        Status,
+        Nickname,
+        CreatedAtUtc,
+        UpdatedAtUtc
+    FROM cards
+    WHERE CardId = v_CardId
+    LIMIT 1;
+END//
 
-DROP PROCEDURE IF EXISTS sp_update_card;//
+DROP PROCEDURE IF EXISTS sp_update_card//
 CREATE PROCEDURE sp_update_card(
     IN p_CardId CHAR(36),
     IN p_Brand VARCHAR(50),
@@ -59,17 +103,33 @@ CREATE PROCEDURE sp_update_card(
 )
 BEGIN
     UPDATE cards
-    SET Brand = p_Brand,
+    SET
+        Brand = p_Brand,
         ExpMonth = p_ExpMonth,
         ExpYear = p_ExpYear,
         Nickname = p_Nickname,
         Status = p_Status
     WHERE CardId = p_CardId;
 
-    SELECT * FROM cards WHERE CardId = p_CardId;
-END;//
+    SELECT
+        CAST(CardId AS CHAR(36)) AS CardId,
+        CAST(UserId AS CHAR(36)) AS UserId,
+        Brand,
+        Last4,
+        ExpMonth,
+        ExpYear,
+        CreditLimit,
+        AvailableCredit,
+        Status,
+        Nickname,
+        CreatedAtUtc,
+        UpdatedAtUtc
+    FROM cards
+    WHERE CardId = p_CardId
+    LIMIT 1;
+END//
 
-DROP PROCEDURE IF EXISTS sp_close_card;//
+DROP PROCEDURE IF EXISTS sp_close_card//
 CREATE PROCEDURE sp_close_card(
     IN p_CardId CHAR(36)
 )
@@ -78,21 +138,52 @@ BEGIN
     SET Status = 'CLOSED'
     WHERE CardId = p_CardId;
 
-    SELECT * FROM cards WHERE CardId = p_CardId;
-END;//
+    SELECT
+        CAST(CardId AS CHAR(36)) AS CardId,
+        CAST(UserId AS CHAR(36)) AS UserId,
+        Brand,
+        Last4,
+        ExpMonth,
+        ExpYear,
+        CreditLimit,
+        AvailableCredit,
+        Status,
+        Nickname,
+        CreatedAtUtc,
+        UpdatedAtUtc
+    FROM cards
+    WHERE CardId = p_CardId
+    LIMIT 1;
+END//
 
-DROP PROCEDURE IF EXISTS sp_get_cards_by_user;//
+DROP PROCEDURE IF EXISTS sp_get_cards_by_user//
 CREATE PROCEDURE sp_get_cards_by_user(
     IN p_UserId CHAR(36)
 )
 BEGIN
-    SELECT *
+    SELECT
+        CAST(CardId AS CHAR(36)) AS CardId,
+        CAST(UserId AS CHAR(36)) AS UserId,
+        Brand,
+        Last4,
+        ExpMonth,
+        ExpYear,
+        CreditLimit,
+        AvailableCredit,
+        Status,
+        Nickname,
+        CreatedAtUtc,
+        UpdatedAtUtc
     FROM cards
     WHERE UserId = p_UserId
     ORDER BY CreatedAtUtc DESC;
-END;//
+END//
 
-DROP PROCEDURE IF EXISTS sp_record_payment;//
+-- ----------------------------------------------------
+-- TRANSACTIONS
+-- ----------------------------------------------------
+
+DROP PROCEDURE IF EXISTS sp_record_payment//
 CREATE PROCEDURE sp_record_payment(
     IN p_CardId CHAR(36),
     IN p_UserId CHAR(36),
@@ -135,15 +226,33 @@ BEGIN
        SET AvailableCredit = v_NewAvailable
      WHERE CardId = p_CardId;
 
-    INSERT INTO card_transactions (TransactionId, CardId, UserId, Type, Amount, Currency, Merchant, Description, Status)
-    VALUES (v_TxnId, p_CardId, p_UserId, 'PAYMENT', p_Amount, COALESCE(p_Currency, 'USD'), NULL, p_Description, 'COMPLETED');
+    INSERT INTO card_transactions (
+        TransactionId, CardId, UserId, Type, Amount, Currency, Merchant, Description, Status
+    )
+    VALUES (
+        v_TxnId, p_CardId, p_UserId, 'PAYMENT', p_Amount, COALESCE(p_Currency, 'USD'),
+        NULL, p_Description, 'COMPLETED'
+    );
 
     COMMIT;
 
-    SELECT * FROM card_transactions WHERE TransactionId = v_TxnId;
-END;//
+    SELECT
+        CAST(TransactionId AS CHAR(36)) AS TransactionId,
+        CAST(CardId AS CHAR(36)) AS CardId,
+        CAST(UserId AS CHAR(36)) AS UserId,
+        Type,
+        Amount,
+        Currency,
+        Merchant,
+        Description,
+        Status,
+        CreatedAtUtc
+    FROM card_transactions
+    WHERE TransactionId = v_TxnId
+    LIMIT 1;
+END//
 
-DROP PROCEDURE IF EXISTS sp_record_purchase;//
+DROP PROCEDURE IF EXISTS sp_record_purchase//
 CREATE PROCEDURE sp_record_purchase(
     IN p_CardId CHAR(36),
     IN p_UserId CHAR(36),
@@ -200,15 +309,33 @@ BEGIN
        SET AvailableCredit = v_NewAvailable
      WHERE CardId = p_CardId;
 
-    INSERT INTO card_transactions (TransactionId, CardId, UserId, Type, Amount, Currency, Merchant, Description, Status)
-    VALUES (v_TxnId, p_CardId, p_UserId, 'PURCHASE', p_Amount, COALESCE(p_Currency, 'USD'), p_Merchant, p_Description, v_Status);
+    INSERT INTO card_transactions (
+        TransactionId, CardId, UserId, Type, Amount, Currency, Merchant, Description, Status
+    )
+    VALUES (
+        v_TxnId, p_CardId, p_UserId, 'PURCHASE', p_Amount, COALESCE(p_Currency, 'USD'),
+        p_Merchant, p_Description, v_Status
+    );
 
     COMMIT;
 
-    SELECT * FROM card_transactions WHERE TransactionId = v_TxnId;
-END;//
+    SELECT
+        CAST(TransactionId AS CHAR(36)) AS TransactionId,
+        CAST(CardId AS CHAR(36)) AS CardId,
+        CAST(UserId AS CHAR(36)) AS UserId,
+        Type,
+        Amount,
+        Currency,
+        Merchant,
+        Description,
+        Status,
+        CreatedAtUtc
+    FROM card_transactions
+    WHERE TransactionId = v_TxnId
+    LIMIT 1;
+END//
 
-DROP PROCEDURE IF EXISTS sp_finalize_transaction;//
+DROP PROCEDURE IF EXISTS sp_finalize_transaction//
 CREATE PROCEDURE sp_finalize_transaction(
     IN p_TransactionId CHAR(36),
     IN p_NewStatus VARCHAR(20)
@@ -240,9 +367,9 @@ BEGIN
     END IF;
 
     IF v_Status <> p_NewStatus THEN
-        -- For purchases: if moving from PENDING to FAILED, release hold back to available credit
         IF v_Type = 'PURCHASE' AND v_Status = 'PENDING' AND p_NewStatus = 'FAILED' THEN
-            SELECT AvailableCredit, CreditLimit INTO v_Available, v_CreditLimit
+            SELECT AvailableCredit, CreditLimit
+              INTO v_Available, v_CreditLimit
               FROM cards
              WHERE CardId = v_CardId AND UserId = v_UserId;
 
@@ -258,10 +385,23 @@ BEGIN
 
     COMMIT;
 
-    SELECT * FROM card_transactions WHERE TransactionId = p_TransactionId;
-END;//
+    SELECT
+        CAST(TransactionId AS CHAR(36)) AS TransactionId,
+        CAST(CardId AS CHAR(36)) AS CardId,
+        CAST(UserId AS CHAR(36)) AS UserId,
+        Type,
+        Amount,
+        Currency,
+        Merchant,
+        Description,
+        Status,
+        CreatedAtUtc
+    FROM card_transactions
+    WHERE TransactionId = p_TransactionId
+    LIMIT 1;
+END//
 
-DROP PROCEDURE IF EXISTS sp_record_refund;//
+DROP PROCEDURE IF EXISTS sp_record_refund//
 CREATE PROCEDURE sp_record_refund(
     IN p_CardId CHAR(36),
     IN p_UserId CHAR(36),
@@ -305,69 +445,124 @@ BEGIN
        SET AvailableCredit = v_NewAvailable
      WHERE CardId = p_CardId;
 
-    INSERT INTO card_transactions (TransactionId, CardId, UserId, Type, Amount, Currency, Merchant, Description, Status)
-    VALUES (v_TxnId, p_CardId, p_UserId, 'REFUND', p_Amount, COALESCE(p_Currency, 'USD'), p_Merchant, p_Description, 'COMPLETED');
+    INSERT INTO card_transactions (
+        TransactionId, CardId, UserId, Type, Amount, Currency, Merchant, Description, Status
+    )
+    VALUES (
+        v_TxnId, p_CardId, p_UserId, 'REFUND', p_Amount, COALESCE(p_Currency, 'USD'),
+        p_Merchant, p_Description, 'COMPLETED'
+    );
 
     COMMIT;
 
-    SELECT * FROM card_transactions WHERE TransactionId = v_TxnId;
-END;//
+    SELECT
+        CAST(TransactionId AS CHAR(36)) AS TransactionId,
+        CAST(CardId AS CHAR(36)) AS CardId,
+        CAST(UserId AS CHAR(36)) AS UserId,
+        Type,
+        Amount,
+        Currency,
+        Merchant,
+        Description,
+        Status,
+        CreatedAtUtc
+    FROM card_transactions
+    WHERE TransactionId = v_TxnId
+    LIMIT 1;
+END//
 
-DROP PROCEDURE IF EXISTS sp_get_transactions;//
+DROP PROCEDURE IF EXISTS sp_get_transactions//
 CREATE PROCEDURE sp_get_transactions(
     IN p_UserId CHAR(36),
     IN p_CardId CHAR(36),
     IN p_Status VARCHAR(20)
 )
 BEGIN
-    SELECT *
+    SELECT
+        CAST(TransactionId AS CHAR(36)) AS TransactionId,
+        CAST(CardId AS CHAR(36)) AS CardId,
+        CAST(UserId AS CHAR(36)) AS UserId,
+        Type,
+        Amount,
+        Currency,
+        Merchant,
+        Description,
+        Status,
+        CreatedAtUtc
     FROM card_transactions
     WHERE UserId = p_UserId
       AND (p_CardId IS NULL OR CardId = p_CardId)
       AND (p_Status IS NULL OR Status = p_Status)
     ORDER BY CreatedAtUtc DESC;
-END;//
+END//
 
-DROP PROCEDURE IF EXISTS sp_get_payments_by_user;//
+DROP PROCEDURE IF EXISTS sp_get_payments_by_user//
 CREATE PROCEDURE sp_get_payments_by_user(
     IN p_UserId CHAR(36),
     IN p_CardId CHAR(36)
 )
 BEGIN
-    SELECT *
+    SELECT
+        CAST(TransactionId AS CHAR(36)) AS TransactionId,
+        CAST(CardId AS CHAR(36)) AS CardId,
+        CAST(UserId AS CHAR(36)) AS UserId,
+        Type,
+        Amount,
+        Currency,
+        Merchant,
+        Description,
+        Status,
+        CreatedAtUtc
     FROM card_transactions
     WHERE UserId = p_UserId
       AND Type = 'PAYMENT'
       AND (p_CardId IS NULL OR CardId = p_CardId)
     ORDER BY CreatedAtUtc DESC;
-END;//
+END//
 
-DROP PROCEDURE IF EXISTS sp_get_purchases_by_user;//
+DROP PROCEDURE IF EXISTS sp_get_purchases_by_user//
 CREATE PROCEDURE sp_get_purchases_by_user(
     IN p_UserId CHAR(36),
     IN p_CardId CHAR(36)
 )
 BEGIN
-    SELECT *
+    SELECT
+        CAST(TransactionId AS CHAR(36)) AS TransactionId,
+        CAST(CardId AS CHAR(36)) AS CardId,
+        CAST(UserId AS CHAR(36)) AS UserId,
+        Type,
+        Amount,
+        Currency,
+        Merchant,
+        Description,
+        Status,
+        CreatedAtUtc
     FROM card_transactions
     WHERE UserId = p_UserId
       AND Type = 'PURCHASE'
       AND (p_CardId IS NULL OR CardId = p_CardId)
     ORDER BY CreatedAtUtc DESC;
-END;//
+END//
 
-DROP PROCEDURE IF EXISTS sp_get_transaction_history;//
+DROP PROCEDURE IF EXISTS sp_get_transaction_history//
 CREATE PROCEDURE sp_get_transaction_history(
     IN p_TransactionId CHAR(36)
 )
 BEGIN
-    SELECT *
+    SELECT
+        HistoryId,
+        CAST(TransactionId AS CHAR(36)) AS TransactionId,
+        OldStatus,
+        NewStatus,
+        OldAmount,
+        NewAmount,
+        ChangedAtUtc
     FROM card_transaction_history
     WHERE TransactionId = p_TransactionId
     ORDER BY ChangedAtUtc ASC;
-END;//
+END//
 
-DROP PROCEDURE IF EXISTS sp_get_user_summary;//
+DROP PROCEDURE IF EXISTS sp_get_user_summary//
 CREATE PROCEDURE sp_get_user_summary(
     IN p_UserId CHAR(36)
 )
@@ -381,6 +576,6 @@ BEGIN
         SUM(CASE WHEN Type = 'REFUND' THEN Amount ELSE 0 END) AS TotalRefundsAmount
     FROM card_transactions
     WHERE UserId = p_UserId;
-END;//
+END//
 
 DELIMITER ;
