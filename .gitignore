@@ -1,0 +1,36 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor/IDE
+.vscode/
+.idea/
+*.code-workspace
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Node/React
+node_modules/
+dist/
+build/
+coverage/
+.nyc_output/
+
+# Logs & temp
+*.log
+logs/
+tmp/
+
+# .NET
+bin/
+obj/
+.vs/
+*.user
+*.suo
+TestResult*/
+
+# Docker
+**/docker-volume/
