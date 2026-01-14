@@ -30,8 +30,6 @@ public class MySqlUserRepository : IUserRepository
             var created = await conn.QueryFirstOrDefaultAsync<User>(
                 new CommandDefinition("sp_create_user", p, commandType: CommandType.StoredProcedure, cancellationToken: ct));
 
-            Console.WriteLine($"[DB] Usuario creado: {created?.UserId}");
-
             return created;
         }
         catch (MySqlException ex) when (ex.Number == 1062)
@@ -61,10 +59,20 @@ public class MySqlUserRepository : IUserRepository
 
     public async Task<User?> GetByIdAsync(string userId, CancellationToken ct)
     {
-        using var conn = Open();
-        // No tienes SP para esto, así que query directa (válido).
-        const string sql = @"SELECT UserId, Username, Email, IsActive, CreatedAtUtc
-                             FROM users WHERE UserId = @userId LIMIT 1;";
-        return await conn.QueryFirstOrDefaultAsync<User>(new CommandDefinition(sql, new { userId }, cancellationToken: ct));
+        await using var conn = Open();
+
+        const string sql = @"
+        SELECT
+            CAST(UserId AS CHAR(36)) AS UserId,
+            Username,
+            Email,
+            IsActive,
+            CreatedAtUtc
+        FROM users
+        WHERE UserId = @userId
+        LIMIT 1;";
+
+        return await conn.QueryFirstOrDefaultAsync<User>(
+            new CommandDefinition(sql, new { userId }, cancellationToken: ct));
     }
 }

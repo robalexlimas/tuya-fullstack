@@ -6,6 +6,7 @@ using CreditCardApp.Infrastructure.Persistence;
 using CreditCardApp.Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,7 +23,6 @@ var envFile = envPaths
 
 if (envFile is not null)
 {
-    Console.WriteLine($"[ENV] Loading variables from: {envFile}");
     DotNetEnv.Env.Load(envFile);
 }
 else
@@ -47,7 +47,33 @@ string GetEnv(string key, bool required = true, string? defaultValue = null)
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    // Definir esquema de seguridad JWT
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        Description = "Ingresa el token JWT en el formato: Bearer {token}"
+    });
+
+    // Aplicar el esquema de seguridad a todos los endpoints
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 
 var mysqlHost = GetEnv("MYSQL_HOST");
 var mysqlPort = GetEnv("MYSQL_PORT", defaultValue: "3306");
@@ -73,7 +99,7 @@ var jwtOptions = new JwtOptions
 {
     Issuer = GetEnv("JWT_ISSUER", defaultValue: "CreditCardApp"),
     Audience = GetEnv("JWT_AUDIENCE", defaultValue: "CreditCardApp"),
-    SigningKey = GetEnv("JWT_SIGNING_KEY"), // REQUIRED
+    SigningKey = GetEnv("JWT_SIGNING_KEY"),
     ExpMinutes = int.TryParse(
         GetEnv("JWT_EXP_MINUTES", defaultValue: "60"),
         out var minutes
@@ -84,9 +110,7 @@ builder.Services.AddSingleton(jwtOptions);
 
 builder.Services.AddScoped<IUserRepository, MySqlUserRepository>();
 builder.Services.AddSingleton<IPasswordHasher, Pbkdf2PasswordHasher>();
-builder.Services.AddSingleton<ITokenService>(_ =>
-    new JwtTokenService(jwtOptions)
-);
+builder.Services.AddSingleton<ITokenService>(_ => new JwtTokenService(jwtOptions));
 
 builder.Services.AddScoped<RegisterUserUseCase>();
 builder.Services.AddScoped<LoginUseCase>();
@@ -117,6 +141,7 @@ builder.Services
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
+
 app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
 
 app.UseSwagger();
