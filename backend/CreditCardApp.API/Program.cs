@@ -3,6 +3,7 @@ using CreditCardApp.API.Middlewares;
 using CreditCardApp.Application.UseCases.Auth;
 using CreditCardApp.Application.UseCases.Cards;
 using CreditCardApp.Application.UseCases.Payments;
+using CreditCardApp.Application.UseCases.Transactions;
 using CreditCardApp.Domain.Ports;
 using CreditCardApp.Infrastructure.Persistence;
 using CreditCardApp.Infrastructure.Security;
@@ -127,6 +128,9 @@ builder.Services.AddScoped<CreatePaymentUseCase>();
 builder.Services.AddScoped<ListPaymentsUseCase>();
 builder.Services.AddScoped<GetPaymentUseCase>();
 builder.Services.AddScoped<FinalizeTransactionUseCase>();
+builder.Services.AddScoped<ListTransactionsUseCase>();
+builder.Services.AddScoped<GetTransactionHistoryUseCase>();
+builder.Services.AddScoped<GetUserSummaryUseCase>();
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

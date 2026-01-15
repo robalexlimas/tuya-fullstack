@@ -51,7 +51,7 @@ public class MySqlTransactionRepository : ITransactionRepository
         await using var conn = Open();
         await conn.OpenAsync(ct);
 
-        // Query directa (no tienes SP de “get by id”)
+        // Query directa
         const string sql = @"
             SELECT
                 CAST(TransactionId AS CHAR(36)) AS TransactionId,
@@ -90,5 +90,58 @@ public class MySqlTransactionRepository : ITransactionRepository
             new CommandDefinition("sp_finalize_transaction", p, commandType: CommandType.StoredProcedure, cancellationToken: ct));
 
         return updated;
+    }
+
+    public async Task<IReadOnlyList<CardTransaction>> GetTransactionsAsync(
+    string userId,
+    string? cardId,
+    string? status,
+    CancellationToken ct)
+    {
+        await using var conn = Open();
+        await conn.OpenAsync(ct);
+
+        var p = new DynamicParameters();
+        p.Add("p_UserId", userId);
+        p.Add("p_CardId", string.IsNullOrWhiteSpace(cardId) ? null : cardId);
+        p.Add("p_Status", string.IsNullOrWhiteSpace(status) ? null : status);
+
+        var rows = await conn.QueryAsync<CardTransaction>(
+            new CommandDefinition("sp_get_transactions", p, commandType: CommandType.StoredProcedure, cancellationToken: ct));
+
+        return rows.ToList();
+    }
+
+    public async Task<IReadOnlyList<CardTransactionHistory>> GetTransactionHistoryAsync(
+    string userId,
+    string transactionId,
+    CancellationToken ct)
+    {
+        // Verifica ownership
+        var exists = await GetByIdAsync(userId, transactionId, ct);
+        if (exists is null) return Array.Empty<CardTransactionHistory>();
+
+        await using var conn = Open();
+        await conn.OpenAsync(ct);
+
+        var p = new DynamicParameters();
+        p.Add("p_TransactionId", transactionId);
+
+        var rows = await conn.QueryAsync<CardTransactionHistory>(
+            new CommandDefinition("sp_get_transaction_history", p, commandType: CommandType.StoredProcedure, cancellationToken: ct));
+
+        return rows.ToList();
+    }
+
+    public async Task<UserSummary?> GetUserSummaryAsync(string userId, CancellationToken ct)
+    {
+        await using var conn = Open();
+        await conn.OpenAsync(ct);
+
+        var p = new DynamicParameters();
+        p.Add("p_UserId", userId);
+
+        return await conn.QueryFirstOrDefaultAsync<UserSummary>(
+            new CommandDefinition("sp_get_user_summary", p, commandType: CommandType.StoredProcedure, cancellationToken: ct));
     }
 }

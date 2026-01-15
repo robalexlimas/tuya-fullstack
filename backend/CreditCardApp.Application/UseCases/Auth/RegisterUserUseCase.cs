@@ -18,7 +18,7 @@ public class RegisterUserUseCase
 
     public async Task<AuthResponse> ExecuteAsync(RegisterRequest req, CancellationToken ct)
     {
-        // (Opcional) validaciones simples aquí (o FluentValidation en API)
+        // Validaciones simples aquí (o FluentValidation en API)
         var (hash, salt) = _hasher.HashPassword(req.Password);
 
         var created = await _users.CreateAsync(req.Username, req.Email, hash, salt, ct)

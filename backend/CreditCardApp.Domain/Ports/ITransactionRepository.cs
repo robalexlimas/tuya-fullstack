@@ -18,9 +18,22 @@ public interface ITransactionRepository
         string? cardId,
         CancellationToken ct);
 
-    // (Opcional) detalle puntual
+    // Detalle
     Task<CardTransaction?> GetByIdAsync(string userId, string transactionId, CancellationToken ct);
 
     // (General) actualizar estado (usa sp_finalize_transaction)
     Task<CardTransaction?> FinalizeAsync(string userId, string transactionId, string newStatus, CancellationToken ct);
+
+    Task<IReadOnlyList<CardTransaction>> GetTransactionsAsync(
+    string userId,
+    string? cardId,
+    string? status,
+    CancellationToken ct);
+
+    Task<IReadOnlyList<CardTransactionHistory>> GetTransactionHistoryAsync(
+        string userId,
+        string transactionId,
+        CancellationToken ct);
+
+    Task<UserSummary?> GetUserSummaryAsync(string userId, CancellationToken ct);
 }

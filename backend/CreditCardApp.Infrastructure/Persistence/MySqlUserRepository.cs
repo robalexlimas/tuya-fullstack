@@ -24,7 +24,7 @@ public class MySqlUserRepository : IUserRepository
 
         try
         {
-            // Asegura apertura explícita (no siempre necesario, pero ayuda a diagnosticar)
+            // Asegura apertura explícita
             await conn.OpenAsync(ct);
 
             var created = await conn.QueryFirstOrDefaultAsync<User>(
@@ -49,7 +49,7 @@ public class MySqlUserRepository : IUserRepository
         using var conn = Open();
         var p = new DynamicParameters();
         p.Add("p_Username", username);
-        p.Add("p_PasswordHash", "IGNORED"); // el SP no lo usa; lo dejamos por firma
+        p.Add("p_PasswordHash", "IGNORED");
 
         var record = await conn.QueryFirstOrDefaultAsync<UserAuthRecord>(
             new CommandDefinition("sp_authenticate_user", p, commandType: CommandType.StoredProcedure, cancellationToken: ct));
