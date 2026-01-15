@@ -1,30 +1,29 @@
-import Button from "@components/ui/Button";
 import Card from "@components/ui/Card";
-import { useAuth } from "@auth/useAuth";
 
 export default function DashboardPage() {
-    const { user, logout } = useAuth();
-
     return (
-        <div className="min-h-screen p-6">
-            <div className="max-w-4xl mx-auto space-y-4">
-                <Card className="p-6 flex items-center justify-between">
-                    <div>
-                        <h1 className="text-2xl font-semibold">Dashboard</h1>
-                        <p className="text-sm text-black/60 mt-1">
-                            Sesión activa como <span className="font-medium">{user?.username}</span>
-                        </p>
-                    </div>
-                    <Button variant="secondary" onClick={logout}>
-                        Cerrar sesión
-                    </Button>
+        <div className="space-y-4">
+            <Card className="p-6">
+                <h1 className="text-2xl font-semibold">Dashboard</h1>
+                <p className="text-sm text-black/60 mt-2">
+                    Resumen general. Próximo: métricas, tarjetas activas, últimos pagos.
+                </p>
+            </Card>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Card className="p-5">
+                    <div className="text-xs text-black/50">Tarjetas activas</div>
+                    <div className="text-2xl font-semibold mt-1">—</div>
                 </Card>
 
-                <Card className="p-6">
-                    <h2 className="text-lg font-semibold">Siguiente paso</h2>
-                    <p className="text-sm text-black/60 mt-2">
-                        Aquí montaremos: Cards, Payments, Transactions (con layout tipo fintech).
-                    </p>
+                <Card className="p-5">
+                    <div className="text-xs text-black/50">Pagos (mes)</div>
+                    <div className="text-2xl font-semibold mt-1">—</div>
+                </Card>
+
+                <Card className="p-5">
+                    <div className="text-xs text-black/50">Compras (mes)</div>
+                    <div className="text-2xl font-semibold mt-1">—</div>
                 </Card>
             </div>
         </div>
