@@ -27,7 +27,7 @@ export default function TransactionsFilters({
                 <div>
                     <h1 className="text-2xl font-semibold">Transacciones</h1>
                     <p className="text-sm text-black/60 mt-1">
-                        Historial de movimientos (pagos, compras, reembolsos).
+                        Historial de movimientos (pagos).
                     </p>
                 </div>
 
