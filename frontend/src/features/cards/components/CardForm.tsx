@@ -95,7 +95,7 @@ export default function CardForm({
                     <Input
                         name="expYear"
                         type="number"
-                        min={2024}
+                        min={2026}
                         required
                         defaultValue={initial?.expYear ?? new Date().getFullYear()}
                     />
