@@ -2,6 +2,7 @@ using System.Text;
 using CreditCardApp.API.Middlewares;
 using CreditCardApp.Application.UseCases.Auth;
 using CreditCardApp.Application.UseCases.Cards;
+using CreditCardApp.Application.UseCases.Payments;
 using CreditCardApp.Domain.Ports;
 using CreditCardApp.Infrastructure.Persistence;
 using CreditCardApp.Infrastructure.Security;
@@ -113,6 +114,7 @@ builder.Services.AddScoped<IUserRepository, MySqlUserRepository>();
 builder.Services.AddSingleton<IPasswordHasher, Pbkdf2PasswordHasher>();
 builder.Services.AddSingleton<ITokenService>(_ => new JwtTokenService(jwtOptions));
 builder.Services.AddScoped<ICardRepository, MySqlCardRepository>();
+builder.Services.AddScoped<ITransactionRepository, MySqlTransactionRepository>();
 
 builder.Services.AddScoped<RegisterUserUseCase>();
 builder.Services.AddScoped<LoginUseCase>();
@@ -121,6 +123,10 @@ builder.Services.AddScoped<ListCardsUseCase>();
 builder.Services.AddScoped<CreateCardUseCase>();
 builder.Services.AddScoped<UpdateCardUseCase>();
 builder.Services.AddScoped<DeleteCardUseCase>();
+builder.Services.AddScoped<CreatePaymentUseCase>();
+builder.Services.AddScoped<ListPaymentsUseCase>();
+builder.Services.AddScoped<GetPaymentUseCase>();
+builder.Services.AddScoped<FinalizeTransactionUseCase>();
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
