@@ -1,4 +1,5 @@
 version: "3.9"
+
 services:
   mysql:
     image: ${MYSQL_IMAGE:-mysql:8.0}
@@ -17,5 +18,48 @@ services:
       --default-authentication-plugin=${MYSQL_AUTH_PLUGIN:-mysql_native_password}
       --character-set-server=${MYSQL_CHARSET:-utf8mb4}
       --collation-server=${MYSQL_COLLATION:-utf8mb4_0900_ai_ci}
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/CreditCardApp.API/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "5253:5253"
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_PORT: "3306"
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-credit_card_app}
+      MYSQL_USER: ${MYSQL_USER:-appuser}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-apppass}
+
+      JWT_ISSUER: ${JWT_ISSUER:-CreditCardApp}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-CreditCardApp}
+      JWT_SIGNING_KEY: ${JWT_SIGNING_KEY}
+      JWT_EXP_MINUTES: ${JWT_EXP_MINUTES:-60}
+
+      ASPNETCORE_ENVIRONMENT: Development
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        # Vite env en build time
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:5253/api}
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+
 volumes:
   mysql_data:

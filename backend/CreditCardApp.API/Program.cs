@@ -91,7 +91,13 @@ var connectionString =
     $"User ID={mysqlUser};" +
     $"Password={mysqlPass};" +
     $"SslMode=None;" +
+    $"AllowPublicKeyRetrieval=True;" +
+    $"Pooling=true;" +
+    $"Connection Timeout=10;" +
+    $"Default Command Timeout=30;" +
     $"Allow User Variables=True;";
+
+Console.WriteLine($"[DB] Server={mysqlHost};Port={mysqlPort};Database={mysqlDb};User={mysqlUser}");
 
 builder.Services.AddSingleton(new DbOptions
 {
