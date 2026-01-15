@@ -1,3 +1,8 @@
+import { Link } from "react-router-dom";
+import Button from "../../../components/ui/Button";
+import Input from "../../../components/ui/Input";
+import Card from "../../../components/ui/Card";
+
 type Props = {
     onSubmit: (values: { username: string; email: string; password: string }) => void;
     isSubmitting: boolean;
@@ -6,9 +11,13 @@ type Props = {
 
 export default function RegisterForm({ onSubmit, isSubmitting, error }: Props) {
     return (
-        <div className="max-w-md w-full bg-white rounded-2xl shadow p-6">
-            <h1 className="text-2xl font-semibold mb-1">Crear cuenta</h1>
-            <p className="text-sm text-gray-500 mb-6">Regístrate para empezar</p>
+        <Card className="max-w-md p-6">
+            <div className="mb-5">
+                <h1 className="text-2xl font-semibold">Crear cuenta</h1>
+                <p className="text-sm text-black/60 mt-1">
+                    Regístrate para empezar
+                </p>
+            </div>
 
             <form
                 className="flex flex-col gap-3"
@@ -22,16 +31,38 @@ export default function RegisterForm({ onSubmit, isSubmitting, error }: Props) {
                     });
                 }}
             >
-                <input name="username" placeholder="Usuario" className="border rounded-xl px-3 py-2" required />
-                <input name="email" placeholder="Email" className="border rounded-xl px-3 py-2" required />
-                <input name="password" type="password" placeholder="Contraseña" className="border rounded-xl px-3 py-2" required />
+                <div className="space-y-1">
+                    <label className="text-xs font-medium text-black/70">Usuario</label>
+                    <Input name="username" required />
+                </div>
 
-                {error ? <div className="text-sm text-red-600">{error}</div> : null}
+                <div className="space-y-1">
+                    <label className="text-xs font-medium text-black/70">Email</label>
+                    <Input name="email" type="email" required />
+                </div>
 
-                <button disabled={isSubmitting} className="mt-2 rounded-xl bg-black text-white py-2 disabled:opacity-50">
+                <div className="space-y-1">
+                    <label className="text-xs font-medium text-black/70">Contraseña</label>
+                    <Input name="password" type="password" required />
+                </div>
+
+                {error ? (
+                    <div className="rounded-xl bg-tuya-red/10 text-tuya-red text-sm px-3 py-2">
+                        {error}
+                    </div>
+                ) : null}
+
+                <Button type="submit" disabled={isSubmitting} className="mt-2">
                     {isSubmitting ? "Creando..." : "Crear cuenta"}
-                </button>
+                </Button>
+
+                <p className="text-sm text-black/60 mt-2">
+                    ¿Ya tienes cuenta?{" "}
+                    <Link className="text-tuya-red font-medium" to="/login">
+                        Inicia sesión
+                    </Link>
+                </p>
             </form>
-        </div>
+        </Card>
     );
 }

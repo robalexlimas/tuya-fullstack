@@ -1,27 +1,14 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "../pages/LoginPage";
 import RegisterPage from "../pages/RegisterPage";
+import DashboardPage from "../pages/DashboardPage";
 import PrivateRoute from "./PrivateRoute";
-
-function DashboardPlaceholder() {
-    return (
-        <div className="min-h-screen grid place-items-center bg-gray-50">
-            <div className="bg-white rounded-2xl shadow p-6 max-w-md w-full">
-                <h1 className="text-xl font-semibold">Dashboard</h1>
-                <p className="text-sm text-gray-600 mt-2">
-                    Estás logueado ✅. Próximo: cards, pagos, transacciones.
-                </p>
-            </div>
-        </div>
-    );
-}
 
 export default function AppRouter() {
     return (
         <BrowserRouter>
             <Routes>
-                {/* Default */}
-                <Route path="/" element={<Navigate to="/login" replace />} />
+                <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
                 {/* Public */}
                 <Route path="/login" element={<LoginPage />} />
@@ -29,11 +16,10 @@ export default function AppRouter() {
 
                 {/* Protected */}
                 <Route element={<PrivateRoute />}>
-                    <Route path="/dashboard" element={<DashboardPlaceholder />} />
+                    <Route path="/dashboard" element={<DashboardPage />} />
                 </Route>
 
-                {/* Not found */}
-                <Route path="*" element={<Navigate to="/login" replace />} />
+                <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
         </BrowserRouter>
     );

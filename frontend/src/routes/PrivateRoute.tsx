@@ -6,8 +6,8 @@ export default function PrivateRoute() {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen grid place-items-center bg-gray-50">
-                <div className="text-sm text-gray-600">Cargando sesión...</div>
+            <div className="min-h-screen grid place-items-center">
+                <div className="text-sm text-black/60">Cargando sesión...</div>
             </div>
         );
     }

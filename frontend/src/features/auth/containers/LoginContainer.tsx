@@ -18,7 +18,7 @@ export default function LoginContainer() {
                 setSubmitting(true);
                 try {
                     await login(values);
-                    nav("/dashboard");
+                    nav("/dashboard", { replace: true });
                 } catch (e: any) {
                     const msg =
                         e?.response?.data?.message ||

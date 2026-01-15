@@ -1,3 +1,8 @@
+import { Link } from "react-router-dom";
+import Button from "../../../components/ui/Button";
+import Input from "../../../components/ui/Input";
+import Card from "../../../components/ui/Card";
+
 type Props = {
     onSubmit: (values: { username: string; password: string }) => void;
     isSubmitting: boolean;
@@ -6,47 +11,57 @@ type Props = {
 
 export default function LoginForm({ onSubmit, isSubmitting, error }: Props) {
     return (
-        <div className="max-w-md w-full bg-white rounded-2xl shadow p-6">
-            <h1 className="text-2xl font-semibold mb-1">Iniciar sesión</h1>
-            <p className="text-sm text-gray-500 mb-6">Accede con tu usuario y contraseña</p>
+        <Card className="max-w-md p-6">
+            <div className="mb-5">
+                <h1 className="text-2xl font-semibold">Iniciar sesión</h1>
+                <p className="text-sm text-black/60 mt-1">
+                    Accede con tu usuario y contraseña
+                </p>
+            </div>
 
             <form
                 className="flex flex-col gap-3"
                 onSubmit={(e) => {
                     e.preventDefault();
-                    const form = e.currentTarget;
-                    const fd = new FormData(form);
+                    const fd = new FormData(e.currentTarget);
                     onSubmit({
                         username: String(fd.get("username") ?? ""),
                         password: String(fd.get("password") ?? ""),
                     });
                 }}
             >
-                <input
-                    name="username"
-                    placeholder="Usuario"
-                    className="border rounded-xl px-3 py-2"
-                    autoComplete="username"
-                    required
-                />
-                <input
-                    name="password"
-                    type="password"
-                    placeholder="Contraseña"
-                    className="border rounded-xl px-3 py-2"
-                    autoComplete="current-password"
-                    required
-                />
+                <div className="space-y-1">
+                    <label className="text-xs font-medium text-black/70">Usuario</label>
+                    <Input name="username" autoComplete="username" required />
+                </div>
 
-                {error ? <div className="text-sm text-red-600">{error}</div> : null}
+                <div className="space-y-1">
+                    <label className="text-xs font-medium text-black/70">Contraseña</label>
+                    <Input
+                        name="password"
+                        type="password"
+                        autoComplete="current-password"
+                        required
+                    />
+                </div>
 
-                <button
-                    disabled={isSubmitting}
-                    className="mt-2 rounded-xl bg-black text-white py-2 disabled:opacity-50"
-                >
+                {error ? (
+                    <div className="rounded-xl bg-tuya-red/10 text-tuya-red text-sm px-3 py-2">
+                        {error}
+                    </div>
+                ) : null}
+
+                <Button type="submit" disabled={isSubmitting} className="mt-2">
                     {isSubmitting ? "Ingresando..." : "Ingresar"}
-                </button>
+                </Button>
+
+                <p className="text-sm text-black/60 mt-2">
+                    ¿No tienes cuenta?{" "}
+                    <Link className="text-tuya-red font-medium" to="/register">
+                        Regístrate
+                    </Link>
+                </p>
             </form>
-        </div>
+        </Card>
     );
 }
