@@ -1,4 +1,4 @@
-import RegisterContainer from "../features/auth/containers/RegisterContainer";
+import RegisterContainer from "@features/auth/containers/RegisterContainer";
 
 export default function RegisterPage() {
     return (

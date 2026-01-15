@@ -1,5 +1,5 @@
 import axios from "axios";
-import { env } from "../config/env";
+import { env } from "@config/env";
 
 export const TOKEN_STORAGE_KEY = "token";
 

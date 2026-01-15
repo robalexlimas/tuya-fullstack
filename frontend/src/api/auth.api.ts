@@ -1,5 +1,5 @@
 import { httpClient } from "./httpClient";
-import type { BackendAuthResponse, BackendMeResponse, LoginInput, RegisterInput } from "../models/auth.model";
+import type { BackendAuthResponse, BackendMeResponse, LoginInput, RegisterInput } from "@models/auth.model";
 
 export const authApi = {
     login: async (input: LoginInput) => {

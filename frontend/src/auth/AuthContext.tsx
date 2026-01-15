@@ -1,8 +1,8 @@
 import { createContext, useEffect, useMemo, useState } from "react";
-import { authApi } from "../api/auth.api";
-import { TOKEN_STORAGE_KEY } from "../api/httpClient";
-import { mapBackendAuthResponseToTokens, mapBackendMeToAuthUser } from "../mappers/auth.mapper";
-import type { AuthUser, LoginInput, RegisterInput } from "../models/auth.model";
+import { authApi } from "@api/auth.api";
+import { TOKEN_STORAGE_KEY } from "@api/httpClient";
+import { mapBackendAuthResponseToTokens, mapBackendMeToAuthUser } from "@mappers/auth.mapper";
+import type { AuthUser, LoginInput, RegisterInput } from "@models/auth.model";
 
 type AuthContextType = {
     user: AuthUser | null;

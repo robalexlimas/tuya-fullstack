@@ -1,4 +1,4 @@
-import type { AuthTokens, AuthUser, BackendAuthResponse, BackendMeResponse } from "../models/auth.model";
+import type { AuthTokens, AuthUser, BackendAuthResponse, BackendMeResponse } from "@models/auth.model";
 
 export const mapBackendAuthResponseToTokens = (dto: BackendAuthResponse): AuthTokens => ({
     accessToken: dto.accessToken,

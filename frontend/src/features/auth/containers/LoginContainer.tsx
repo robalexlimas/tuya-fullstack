@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../../auth/useAuth";
-import LoginForm from "../components/LoginForm";
+import { useAuth } from "@auth/useAuth";
+import LoginForm from "@features/auth/components/LoginForm";
 
 export default function LoginContainer() {
     const { login } = useAuth();

@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
-import Button from "../../../components/ui/Button";
-import Input from "../../../components/ui/Input";
-import Card from "../../../components/ui/Card";
+import Button from "@components/ui/Button";
+import Input from "@components/ui/Input";
+import Card from "@components/ui/Card";
 
 type Props = {
     onSubmit: (values: { username: string; password: string }) => void;

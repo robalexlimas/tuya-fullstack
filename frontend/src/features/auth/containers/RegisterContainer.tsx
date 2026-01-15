@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../../auth/useAuth";
-import RegisterForm from "../components/RegisterForm";
+import { useAuth } from "@auth/useAuth";
+import RegisterForm from "@features/auth/components/RegisterForm";
 
 export default function RegisterContainer() {
     const { register } = useAuth();

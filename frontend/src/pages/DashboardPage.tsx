@@ -1,6 +1,6 @@
-import Button from "../components/ui/Button";
-import Card from "../components/ui/Card";
-import { useAuth } from "../auth/useAuth";
+import Button from "@components/ui/Button";
+import Card from "@components/ui/Card";
+import { useAuth } from "@auth/useAuth";
 
 export default function DashboardPage() {
     const { user, logout } = useAuth();
